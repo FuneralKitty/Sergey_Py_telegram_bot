@@ -7,5 +7,5 @@ maximum = (1,100000)
 bye_keywords = ['bye', 'пока', 'addios', 'до свидания','прощай']
 hello_keywords = ['привет','hello','ciao','Buon ']
 math_games = ['калькулятор', 'чётное/нечётное', 'простое/сложное','прогрессия','НОД']
-hardness_constants = ['легко','сложно','тяжело','DOOM',
-                      'low','medium','hard','DOOM']
+hardness = ['легко','сложно','тяжело','DOOM',
+            'low','medium','hard','DOOM']

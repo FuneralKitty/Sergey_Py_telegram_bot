@@ -56,12 +56,7 @@ class DataManagement:
         """
         user_id = message.from_user.id
         new_value = message.text.lower()
-
-        if user_id in self.data:
-            self.data[user_id][key] = new_value
-        else:
-            self.data[user_id] = {key: new_value}
-
+        self.data[user_id][key] = new_value
         try:
             with open(self.data_path, 'w', encoding='utf-8') as data_file:
                 json.dump(self.data, data_file, indent=2)

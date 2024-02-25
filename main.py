@@ -1,11 +1,10 @@
-from constants import hardness_constants, hello_keywords, bye_keywords,math_games
+from constants import hardness, hello_keywords, bye_keywords,math_games
 from change_language import *
-import change_language
+from change_hardness import *
 import telebot
 import re
 from Anya_bot_class import Anya
-from math_module import *
-hardness = False
+import change_hardness
 
 @bot.message_handler(commands=["start", "change_language"])
 def ask_for_lang(message):
@@ -27,6 +26,31 @@ def hello_message(message):
 @bot.message_handler(func=lambda message: message.text.lower() in bye_keywords)
 def hello_message(message):
     bot.send_message(message.chat.id,Anya.say_goodbye(message))
+
+
+@bot.message_handler(commands=["hardness"])
+def ask_for_lang(message):
+    global hardness_flag
+    ask_hardness(message)
+    hardness_flag = True
+
+@bot.message_handler(func=lambda message: message.text.lower() in hardness)
+def start_message_language(message):
+    global hardness_flag
+    # Check if the message was sent as a command
+    if hardness_flag:
+        get_hardness(message)
+        hardness_flag = False
+
+
+
+
+
+
+
+
+
+
 
 
 # @bot.message_handler(func=lambda message: message.text.lower() in hardness_constants)
