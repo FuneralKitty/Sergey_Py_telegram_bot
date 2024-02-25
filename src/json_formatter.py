@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 class DataManagement:
     def __init__(self, data_path):
@@ -9,7 +10,10 @@ class DataManagement:
         """Получение данных из JSON"""
         try:
             with open(self.data_path, 'r', encoding='utf-8') as data_file:
-                return json.load(data_file)
+                # Загружаем данные из файла JSON
+                json_data = json.load(data_file)
+                # Преобразуем загруженные данные в defaultdict(dict)
+                return defaultdict(dict, json_data)
         except Exception as e:
             print(f"Произошла ошибка при чтении файла: {e}")
             return {}
@@ -18,13 +22,9 @@ class DataManagement:
         """
         Обновление языка пользователя в файле JSON.
         """
-        user_id = message.from_user.id
+        user_id = str(message.from_user.id)
         new_value = message.text.lower()
-
-        if user_id in self.data:
-            self.data[user_id][key] = new_value
-        else:
-            self.data[user_id] = {key: new_value}
+        self.data[user_id][key] = new_value
 
         try:
             with open(self.data_path, 'w', encoding='utf-8') as data_file:
