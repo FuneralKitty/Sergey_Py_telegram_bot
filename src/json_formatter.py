@@ -9,7 +9,7 @@ class DataManagement:
         """Получение данных из JSON"""
         try:
             with open(self.data_path, 'r', encoding='utf-8') as data_file:
-                return json.loads(data_file, encoding='utf')
+                return json.load(data_file)
         except Exception as e:
             print(f"Произошла ошибка при чтении файла: {e}")
             return {}
