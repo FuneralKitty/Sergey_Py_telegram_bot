@@ -14,16 +14,8 @@ def ask_language(message):
 
 
 def get_language(message):
-    d = DataManagement('All_data/users.json')
-    d.dump_json_data(message, key='language')
-    with open('All_data/users.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
-    # Получение языка пользователя из данных
     user_language = message.text
     print(user_language)
-    # Определение переменных text1 и text2 до оператора match
-    text1, text2 = '', ''
-
     match user_language:
         case 'русский':
             text1, text2 = f'Выбран {message.text} язык: ', 'Продолжаем ...'
@@ -35,6 +27,10 @@ def get_language(message):
             bot.send_message(message.chat.id, text='Continue ...',
                              reply_markup=telebot.types.ReplyKeyboardRemove())
         case 'italiano':
-            text1, text2 = f'Linguaggio scelto: {message.text}', 'Continua ...'
             bot.send_message(message.chat.id,  f'Linguaggio scelto: {message.text}')
             bot.send_message(message.chat.id, text='Continua ...', reply_markup=telebot.types.ReplyKeyboardRemove())
+        case _:
+            bot.send_message(message.chat.id, f'Linguaggio scelto: {message.text}')
+            bot.send_message(message.chat.id, text='Continua ...', reply_markup=telebot.types.ReplyKeyboardRemove())
+    d = DataManagement('All_data/users.json')
+    d.dump_json_data(message, key='language')

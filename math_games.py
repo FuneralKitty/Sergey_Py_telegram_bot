@@ -18,7 +18,7 @@ def ask_math(message):
         with open('All_data/users.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
     except FileNotFoundError as f:
-        bot.send_message('Mistakes in programm')
+        bot.send_message('Mistakes in programm',f)
     user_language = data[str(message.from_user.id)]['language']
     match user_language:
         case 'русский':
@@ -29,39 +29,6 @@ def ask_math(message):
             math_functions = all_math_functions['italiano']
     markup.add(*(KeyboardButton(language) for language in math_functions))
     bot.send_message(message.chat.id, text, reply_markup=markup)
-
-def get_math(message,game=None):
-    welcome_user(message)
-    print(game)
-    match game:
-        case 'calc':
-            global calc
-        case 'prime':
-            global prime
-        case 'even':
-            global even
-        case 'progression':
-            global progression
-        case 'gcd':
-            global gcd
-    user_score = 0
-    game_rounds = 3
-
-    #Дописать программу проверить вход сообщений от пользователя
-    while user_score < game_rounds:
-        quest, operation = get_the_game(message)
-        bot.send_message(message.from_user.id,f'Question: {quest}')
-        user_answer = bot.get_message(chat_id).text
-        if operation == answer:
-            print('Correct!')
-            user_score += 1
-        else:
-            print(f"'{answer}' is the wrong answer."
-                    f"Correct answer was '{operation}'."
-                    f"\nLet's try again ,{message.from_user.first_name}!")
-            break
-    if user_score == game_rounds:
-        print(f'Congratulations, {message.from_user.first_name}!')
 
 
 def welcome_user(message):
@@ -79,23 +46,61 @@ def welcome_user(message):
 
 
 def get_the_game(message):
-    if message.text in ['калькулятор','calculator','calcolartice']:
-        b=Math().calculator()
-        flag = 'calc'
-        return b,flag
+    with open('All_data/users.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        hardness = data[str(message.from_user.id)]['hardness']
+        language = data[str(message.from_user.id)]['language']
+        print(hardness, language)
+    if message.text in ['калькулятор','calculator','calcolatrice']:
+        flag = 'calculator'
+        b = Math()
+        for_user,answer = b.calculator(hardness=hardness)
+        description = b.get_description(language, 'calculator')
+        return flag,for_user,answer,description
     if message.text in ['простое число','prime number','numero primo']:
-        b = Math().is_prime()
         flag = 'prime'
-        return b,flag
+        b = Math()
+        for_user, answer = b.is_prime_game(hardness=hardness)
+        description = b.get_description(language,'is_prime_game')
+        print(flag,for_user,answer,description)
+        return flag,for_user,answer,description
     if message.text in ['четное/нечетное','even/odd','pari/dispari']:
-        b = Math().is_even_game()
         flag = 'even'
-        return b, flag
+        b = Math()
+        for_user, answer = b.is_even_game(hardness=hardness)
+        description = b.get_description(language, 'is_even_game')
+        return flag,for_user,answer,description
     if message.text in ['прогрессия','progression','progressione']:
-        b = Math().progression()
         flag = 'progression'
-        return b, flag
-    if message.text in ['наибольший общий делитель','greatest common divisor','massimo comune divisore']
-        b = Math().generate_gcd_question()
+        b = Math()
+        for_user, answer = b.progression(hardness=hardness)
+        description = b.get_description(language, 'progression')
+        return flag,for_user,answer, description
+    if message.text in ['наибольший общий делитель','greatest common divisor','massimo comune divisore']:
         flag = 'gcd'
-        return b, flag
+        b = Math()
+        for_user, answer = b.generate_gcd_question(hardness=hardness)
+        description = b.get_description(language, 'generate_gcd_question')
+        return flag,for_user,answer,description
+    else:
+        print('Someting went wrong in Get_The_Game, math games')
+
+def yes_or_no_math_markup(message):
+    markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True, input_field_placeholder='Сделайте правильный выбор',
+                                         resize_keyboard=True)
+    italian = ['si','no']
+    english = ['yes', 'no']
+    russian = ['да','нет']
+    with open('All_data/users.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    # Получение языка пользователя из данных
+    user_language = data.get(str(message.from_user.id), {}).get('language')
+    match user_language:
+        case 'русский':
+            user_lang = russian
+        case 'english':
+            user_lang = english
+        case 'italiano':
+            user_lang = italian
+    markup.add(*(KeyboardButton(language) for language in user_lang))
+    bot.send_message(message.chat.id,'Even or Odd', reply_markup=markup)
