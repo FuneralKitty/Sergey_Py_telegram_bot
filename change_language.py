@@ -1,3 +1,4 @@
+from src.test_of_psql import update_user_params
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import json
@@ -14,6 +15,7 @@ def ask_language(message):
 
 
 def get_language(message):
+    update_user_params(message, 'language',)
     user_language = message.text
     print(user_language)
     match user_language:
@@ -32,5 +34,3 @@ def get_language(message):
         case _:
             bot.send_message(message.chat.id, f'Linguaggio scelto: {message.text}')
             bot.send_message(message.chat.id, text='Continua ...', reply_markup=telebot.types.ReplyKeyboardRemove())
-    d = DataManagement('All_data/users.json')
-    d.dump_json_data(message, key='language')

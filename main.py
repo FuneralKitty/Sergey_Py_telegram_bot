@@ -4,22 +4,33 @@ from change_hardness import *
 from Anya_bot_class import Anya
 from math_games import *
 from src.arithmetic import Math
+from src.test_of_psql import *
 @bot.message_handler(commands=["start", "change_language"])
 def ask_for_lang(message):
     global language_flag
-    ask_language(message)
     language_flag = True
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    language = 'russian'  # Example value, change as needed
+    hardness = 'low'  # Example value, change as needed
+    win_count = 0  # Example value, change as needed
+    existing_user = check_existing_user(user_id)
+    if not existing_user:
+        insert_into_database(user_id, user_name, language, hardness, win_count)
+        bot.send_message(message.chat.id, "Данные пользователя добавлены в базу данных.")
+    else:
+        bot.send_message(message.chat.id, "Пользователь уже существует в базе данных.")
+    print('True')
+    ask_language(message)
 
-    def handle_language(message):
-        global language_flag
-        if message.text.lower() in ['русский', 'english', 'italiano']:
-            get_language(message)
-            language_flag = False
-        else:
-            bot.send_message(message.chat.id, "Please select a valid language.")
 
-    # Register the next step handler to handle the language selection
-    bot.register_next_step_handler(message, handle_language)
+@bot.message_handler(func=lambda message: message.text.lower() in ['русский','english', 'italiano'])
+def start_message_language(message):
+    global language_flag
+    # Check if the message was sent as a command
+    if language_flag:
+        get_language(message)
+        language_flag = False
 
 @bot.message_handler(func=lambda message: message.text.lower() in hello_keywords)
 def hello_message(message):
