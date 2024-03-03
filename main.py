@@ -4,7 +4,7 @@ from change_hardness import *
 from Anya_bot_class import Anya
 from math_games import *
 from src.arithmetic import Math
-from src.test_of_psql import *
+from src.database import *
 @bot.message_handler(commands=["start", "change_language"])
 def ask_for_lang(message):
     global language_flag
@@ -31,13 +31,6 @@ def start_message_language(message):
     if language_flag:
         get_language(message)
         language_flag = False
-
-@bot.message_handler(func=lambda message: message.text.lower() in hello_keywords)
-def hello_message(message):
-    bot.send_message(message.chat.id,Anya.say_hello(message))
-@bot.message_handler(func=lambda message: message.text.lower() in bye_keywords)
-def hello_message(message):
-    bot.send_message(message.chat.id,Anya.say_goodbye(message))
 
 
 @bot.message_handler(commands=["hardness"])
@@ -111,5 +104,14 @@ def process_math_step(message, correct_answer,flag=None):
         except ValueError as e:
                 bot.send_message(message.from_user.id,'Value is incorrect, U must write only integers!')
                 bot.register_next_step_handler(message,ask_for_lang)
+
+
+@bot.message_handler(func=lambda message: message.text.lower() in hello_keywords)
+def hello_message(message):
+    bot.send_message(message.chat.id,Anya.say_hello(message))
+
+@bot.message_handler(func=lambda message: message.text.lower() in bye_keywords)
+def hello_message(message):
+    bot.send_message(message.chat.id,Anya.say_goodbye(message))
 
 bot.polling(none_stop=True)

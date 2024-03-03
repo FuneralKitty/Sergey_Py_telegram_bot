@@ -63,28 +63,18 @@ def check_existing_user(user_id):
     conn.commit()
     return existing_user
 
-# Handler for /start command
-# @bot.message_handler(commands=['start'])
-# def handle_start(message):
-#     bot.send_message(message.chat.id, "Привет! Отправь мне сообщение, чтобы узнать время его получения.")
-#
-# # Handler for all incoming text messages
-# @bot.message_handler(func=lambda message: True)
-# def handle_message(message):
-#     message_date = datetime.datetime.fromtimestamp(message.date)
-#     formatted_date = message_date.strftime("%Y-%m-%d %H:%M:%S")
-#     bot.send_message(message.chat.id, f"Ваше сообщение было получено {formatted_date}.")
-#     user_id = message.from_user.id
-#     user_name = message.from_user.first_name
-#     language = 'russian'  # Example value, change as needed
-#     hardness = 'low'  # Example value, change as needed
-#     win_count = 0  # Example value, change as needed
-#     existing_user = check_existing_user(user_id)
-#     if not existing_user:
-#         insert_into_database(user_id, user_name, language, hardness, win_count)
-#         bot.send_message(message.chat.id, "Данные пользователя добавлены в базу данных.")
-#     else:
-#         bot.send_message(message.chat.id, "Пользователь уже существует в базе данных.")
-#     print('True')
-#     update_user_params(message,'language','english')
-# bot.polling(none_stop=True)
+def get_user_data_by_param(user_id, param):
+    cur, conn = establish_connection()
+
+    if param == 'language':
+        cur.execute("SELECT language FROM person WHERE user_id = %s", (user_id,))
+    elif param == 'hardness':
+        cur.execute("SELECT hardness FROM person WHERE user_id = %s", (user_id,))
+
+    user_data = cur.fetchone()
+    conn.commit()
+
+    if user_data:
+        return user_data[0]
+    else:
+        return None

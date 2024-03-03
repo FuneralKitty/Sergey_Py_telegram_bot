@@ -1,9 +1,9 @@
-from src.test_of_psql import update_user_params
+from src.database import update_user_params
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import json
 from constants import TOKEN
-from src.json_formatter import DataManagement
+
 bot = telebot.TeleBot(TOKEN)
 
 def ask_language(message):

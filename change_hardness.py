@@ -1,20 +1,18 @@
-from src.json_formatter import DataManagement
+
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 from constants import *
 import json
-
+from src.database import *
 bot = telebot.TeleBot(TOKEN)
 
 
 def ask_hardness(message):
     markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True, input_field_placeholder='input hardness u prefer')
     text = "Выберите сложность / Choose difficulty level:"
-    with open('All_data/users.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
     # Получение языка пользователя из данных
-    user_language = data.get(str(message.from_user.id), {}).get('language')
+    user_id = message.from_user.id
+    user_language = get_user_data_by_param(user_id, param='language')
 
     # Определение сложности в зависимости от языка пользователя
     match user_language:
@@ -37,22 +35,39 @@ def ask_hardness(message):
 
 
 def get_hardness(message):
-    d = DataManagement('All_data/users.json')
-    d.dump_json_data(message,key='hardness')
-    with open('All_data/users.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    if message.text in ['легко', 'facile']:
+        message.text = 'low'
+    elif message.text in ['сложно', 'media']:
+        message.text = 'medium'
+    elif message.text in ['тяжело', 'difficile']:
+        message.text = 'difficile'
+    user_id = message.from_user.id
+    update_user_params(message,param='hardness')
     # Получение языка пользователя из данных
-    user_language = data.get(str(message.from_user.id), {}).get('language')
+    user_language = get_user_data_by_param(user_id, 'language')
 
     # Определение сложности в зависимости от языка пользователя
-    match user_language:
-        case 'русский':
-            text1, text2 = 'Сложность установлена на: ', 'Продолжаем ...'
-        case 'english':
-            text1, text2 = 'Difficulty set to: ', 'Continue ...'
-        case 'italiano':
-            text1, text2 = 'Difficoltà impostata su: ', 'Continua ...'
+    if user_language:
+        hardness_text = ''
+        if user_language == 'русский':
+            hardness_text = 'Сложность установлена на:'
+        elif user_language == 'english':
+            hardness_text = 'Difficulty set to:'
+        elif user_language == 'italiano':
+            hardness_text = 'Difficoltà impostata su:'
 
-    bot.send_message(message.chat.id, f"{text1} {message.text}")
-    # If you want to clear the keyboard after language selection, you can send a message with no reply markup
-    bot.send_message(message.chat.id, text2,reply_markup=telebot.types.ReplyKeyboardRemove())
+        if hardness_text:
+            bot.send_message(message.chat.id, f"{hardness_text} {message.text}")
+            # Если вы хотите очистить клавиатуру после выбора языка, можно отправить сообщение без разметки ответа
+            bot.send_message(message.chat.id, 'Continue...', reply_markup=telebot.types.ReplyKeyboardRemove())
+        else:
+            bot.send_message(message.chat.id, "Unsupported language.")
+    else:
+        bot.send_message(message.chat.id, "Language not found in database.")
+
+    if message.text in ['легко', 'facile']:
+        value = 'low'
+    elif message.text in ['сложно', 'media']:
+        value = 'medium'
+    elif message.text in ['тяжело', 'difficile']:
+        value = 'difficile'
