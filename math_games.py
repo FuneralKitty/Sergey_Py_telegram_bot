@@ -48,44 +48,48 @@ def welcome_user(message):
             bot.send_message(message.from_user.id, text=text)
 
 
-def get_the_game(message):
-    user_id = message.from_user.id
+def get_the_game(message=None, mode=None, mess=None):
+    if message:
+        user_id = message.from_user.id
+    elif mess:
+        user_id = mess
+    else:
+        print("Neither message nor mess provided!")
+        return
+
     hardness = get_user_data_by_param(user_id, param='hardness')
     language = get_user_data_by_param(user_id, param='language')
     print(hardness, language)
-    if message.text in ['калькулятор','calculator','calcolatrice']:
+    if mode == 'calculator' or (message and message.text.lower() in ['калькулятор', 'calculator', 'calcolatrice']):
         flag = 'calculator'
         b = Math()
-        for_user,answer = b.calculator(hardness=hardness)
+        for_user, answer = b.calculator(hardness=hardness)
         description = b.get_description(language, 'calculator')
-        return flag,for_user,answer,description
-    if message.text in ['простое число','prime number','numero primo']:
+    elif mode == 'prime' or (message and message.text.lower() in ['простое число', 'prime number', 'numero primo']):
         flag = 'prime'
         b = Math()
         for_user, answer = b.is_prime_game(hardness=hardness)
-        description = b.get_description(language,'is_prime_game')
-        print(flag,for_user,answer,description)
-        return flag,for_user,answer,description
-    if message.text in ['четное/нечетное','even/odd','pari/dispari']:
+        description = b.get_description(language, 'is_prime_game')
+    elif mode == 'even' or (message and message.text.lower() in ['четное/нечетное', 'even/odd', 'pari/dispari']):
         flag = 'even'
         b = Math()
         for_user, answer = b.is_even_game(hardness=hardness)
         description = b.get_description(language, 'is_even_game')
-        return flag,for_user,answer,description
-    if message.text in ['прогрессия','progression','progressione']:
+    elif mode == 'progression' or (message and message.text.lower() in ['прогрессия', 'progression', 'progressione']):
         flag = 'progression'
         b = Math()
         for_user, answer = b.progression(hardness=hardness)
         description = b.get_description(language, 'progression')
-        return flag,for_user,answer, description
-    if message.text in ['наибольший общий делитель','greatest common divisor','massimo comune divisore']:
+    elif mode == 'gcd' or (message and message.text.lower() in ['наибольший общий делитель', 'greatest common divisor', 'massimo comune divisore']):
         flag = 'gcd'
         b = Math()
         for_user, answer = b.generate_gcd_question(hardness=hardness)
         description = b.get_description(language, 'generate_gcd_question')
-        return flag,for_user,answer,description
     else:
-        print('Someting went wrong in Get_The_Game, math games')
+        print('Something went wrong in Get_The_Game, math games')
+        return None
+
+    return flag, for_user, answer, description
 
 def yes_or_no_math_markup(message):
     markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True, input_field_placeholder='Сделайте правильный выбор',

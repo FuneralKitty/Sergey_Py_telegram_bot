@@ -3,8 +3,15 @@ from change_language import *
 from change_hardness import *
 from Anya_bot_class import Anya
 from math_games import *
-from src.arithmetic import Math
 from src.database import *
+
+
+#Создание баз данных
+
+create_user_table()
+create_notification_table()
+
+
 @bot.message_handler(commands=["start", "change_language"])
 def ask_for_lang(message):
     global language_flag
@@ -49,61 +56,67 @@ def start_message_language(message):
 
 
 @bot.message_handler(commands=["math"])  # начало всех игр
-def ask_for_lang(message):
-    global math_flag
-    ask_math(message)
-    math_flag = True
-    bot.register_next_step_handler(message, start_message)
-
-def start_message(message):
-    global math_flag
-    print('start message')
+def ask_for_math(message):
     welcome_user(message)
-    global flag
-    if math_flag:
-        try:
-            flag, for_user_quest, answer, description = get_the_game(message)
-            bot.send_message(message.from_user.id, answer)
-            math_flag = False
-            bot.send_message(message.from_user.id, description)
-            bot.send_message(message.from_user.id, for_user_quest)
-            if flag == 'prime' or flag == 'even':
-                yes_or_no_math_markup(message)
-            bot.register_next_step_handler(message, process_math_step, answer, flag = flag)
-        except Exception as e:
-            bot.send_message(message.from_user,'Something went wront, maybe u tried to switch the command')
-def process_math_step(message, correct_answer,flag=None):
-    print('process_math_step activated')
-    global math_flag
-    print('message: ', message.text.lower(), 'correct message:', correct_answer)
+    ask_math(message)
+    bot.register_next_step_handler(message, starter)
+
+
+def starter(message):
+    print('passed 2')
+    print(message.text)
+    bot.send_message(message.from_user.id, 'Бот активирован начинаем математику!')
+    flag, for_user_quest, answer, description = get_the_game(message)
+    print(flag, for_user_quest, answer, description)
+    try:
+        bot.send_message(message.from_user.id, description)
+        bot.send_message(message.from_user.id, answer)
+        bot.send_message(message.from_user.id, for_user_quest)
+        if flag == 'prime' or flag == 'even':
+            yes_or_no_math_markup(message)
+            bot.register_next_step_handler(message, process_math_step, answer=answer, flag=flag)
+        else:
+            bot.register_next_step_handler(message, process_math_step, answer, flag=flag)
+    except Exception as e:
+        bot.send_message(message.from_user.id, 'Something went wrong, maybe you tried to switch the command')
+        print(e)
+
+
+def process_math_step(message, answer, flag=None):
+    if message.text.lower() == 'off':
+        bot.send_message(message.from_user.id, 'Bot is Deactivated')
+        return
+    print('message: ', message.text.lower(), 'correct message:', answer)
     if flag == 'prime' or flag == 'even':
         try:
-            if message.text.lower() in correct_answer:
-                bot.send_message(message.from_user.id, 'Вы правы! Для выбора следующей игры нажмите /math')
-                math_flag = True
-                bot.register_next_step_handler(message, ask_for_lang)
+            if message.text.lower() in answer:
+                bot.send_message(message.from_user.id, 'Вы правы!')
             else:
                 bot.send_message(message.from_user.id, 'Вы неправильно ответили.')
-                math_flag = True
-                bot.send_message(message.from_user.id, 'Для выбора игры нажмите /math')
-        except ValueError as e:
-            bot.send_message(message.from_user, 'Value is incorrect, write Yes/no')
-            bot.register_next_step_handler()
-    if flag == 'gcd' or flag == 'progression' or flag == 'calculator':
+        except ValueError:
+            bot.send_message(message.from_user.id, 'Value is incorrect, write Yes/no')
+    else:
         try:
             user_answer = int(message.text.strip())
-            print(user_answer)
-            if user_answer == correct_answer:
-               bot.send_message(message.from_user.id, 'Вы правы! Для выбора следующей игры нажмите /math')
-               math_flag = True
-               bot.register_next_step_handler(message,ask_for_lang)
+            if user_answer == int(answer):
+                bot.send_message(message.from_user.id, 'Вы правы!')
             else:
-               bot.send_message(message.from_user.id, 'Вы неправильно ответили.')
-               math_flag = True
-               bot.send_message(message.from_user.id, 'Для выбора игры нажмите /math')
-        except ValueError as e:
-                bot.send_message(message.from_user.id,'Value is incorrect, U must write only integers!')
-                bot.register_next_step_handler(message,ask_for_lang)
+                bot.send_message(message.from_user.id, 'Вы неправильно ответили.')
+        except ValueError:
+            bot.send_message(message.from_user.id, 'Value is incorrect, you must write only integers!')
+    mess = int(message.from_user.id)
+    flag, for_user_quest, answer, description = get_the_game(mess=mess, mode=flag)
+    if flag == 'prime' or flag == 'even':
+        yes_or_no_math_markup(message)
+        bot.send_message(message.from_user.id, for_user_quest)
+        bot.send_message(message.from_user.id, answer)
+        bot.register_next_step_handler(message, process_math_step, answer=answer, flag=flag)
+    else:
+        bot.send_message(message.chat.id, for_user_quest)
+        bot.send_message(message.from_user.id, answer)
+        bot.register_next_step_handler(message, process_math_step, answer=answer, flag=flag)
+
+
 
 
 @bot.message_handler(func=lambda message: message.text.lower() in hello_keywords)

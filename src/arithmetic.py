@@ -17,7 +17,7 @@ class Math:
             result = ['No/Нет', 'No', 'no', 'нет','Нет']
         return to_message, result
 
-    def make_calculator_with_difficulties(self,hardness, operator):
+    def make_calculator_with_difficulties(self, hardness, operator):
         '''Возвращает str и int формат для калькулятора'''
         if hardness in ['легко','low','facile']:
             a, b = 1, 100

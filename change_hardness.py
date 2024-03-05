@@ -35,14 +35,16 @@ def ask_hardness(message):
 
 
 def get_hardness(message):
-    if message.text in ['легко', 'facile']:
+    bot.send_message(message.chat.id, str(message.text))
+    if message.text in ['легко', 'facile', 'low']:
         message.text = 'low'
-    elif message.text in ['сложно', 'media']:
+    elif message.text in ['сложно', 'media', 'medium']:
         message.text = 'medium'
-    elif message.text in ['тяжело', 'difficile']:
+    elif message.text in ['тяжело', 'difficile', 'difficult']:
         message.text = 'difficile'
+    print(type(message.text))
     user_id = message.from_user.id
-    update_user_params(message,param='hardness')
+    update_user_params(message, param='hardness')
     # Получение языка пользователя из данных
     user_language = get_user_data_by_param(user_id, 'language')
 
@@ -65,9 +67,4 @@ def get_hardness(message):
     else:
         bot.send_message(message.chat.id, "Language not found in database.")
 
-    if message.text in ['легко', 'facile']:
-        value = 'low'
-    elif message.text in ['сложно', 'media']:
-        value = 'medium'
-    elif message.text in ['тяжело', 'difficile']:
-        value = 'difficile'
+

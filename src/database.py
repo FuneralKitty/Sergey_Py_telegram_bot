@@ -1,10 +1,12 @@
 import psycopg2
 import telebot
 from constants import TOKEN
-import datetime
+
 
 bot = telebot.TeleBot(TOKEN)
 
+
+# noinspection SpellCheckingInspection
 def establish_connection():
     try:
         conn = psycopg2.connect(
@@ -19,6 +21,7 @@ def establish_connection():
     except psycopg2.Error as e:
         print("Error:", e)
 
+
 # Creating a new table in the database
 def create_user_table():
     cur, conn = establish_connection()
@@ -32,13 +35,26 @@ def create_user_table():
     )""")
     cur.close()
     conn.commit()
-create_user_table()
+
+
+def create_notification_table():
+    cur, conn = establish_connection()
+    cur.execute("""CREATE TABLE IF NOT EXISTS another_table (
+    id SERIAL PRIMARY KEY,
+    person_id INT REFERENCES person(id)
+    )""")
+    cur.close()
+    conn.commit()
+
+
 # Function to insert data into the database
 def insert_into_database(user_id, user_name, language, hardness, win_count):
     cur, conn = establish_connection()
     cur.execute("INSERT INTO person (user_id, user_name, language, hardness, win_count) VALUES (%s, %s, %s, %s, %s)",
                 (user_id, user_name, language, hardness, win_count))
     conn.commit()
+
+
 def update_user_params(message, param):
     user_id = message.from_user.id
     cur, conn = establish_connection()
@@ -55,6 +71,8 @@ def update_user_params(message, param):
         cur.execute("UPDATE person SET win_count = %s WHERE user_id = %s",
                     (new_value, user_id))
         conn.commit()
+
+
 # Function to check if a user already exists in the database
 def check_existing_user(user_id):
     cur, conn = establish_connection()
@@ -62,6 +80,7 @@ def check_existing_user(user_id):
     existing_user = cur.fetchone()
     conn.commit()
     return existing_user
+
 
 def get_user_data_by_param(user_id, param):
     cur, conn = establish_connection()
